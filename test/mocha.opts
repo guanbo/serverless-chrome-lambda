@@ -1,0 +1,7 @@
+--require should
+--require should-http
+--ui bdd
+--slow 1500
+--exit
+--timeout 35000
+--require babel-register

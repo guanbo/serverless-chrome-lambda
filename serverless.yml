@@ -1,0 +1,99 @@
+service: serverless-chrome-lambda
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: cn-northwest-1
+  endpointType: REGIONAL
+  # aws-cn not support enviroment
+  # environment:
+  #   DEBUG: "*"
+  #   PAGE_LOAD_TIMEOUT: 20000
+  #   LOGGING: true
+
+plugins:
+  - serverless-plugin-chrome
+  - serverless-webpack
+  - serverless-aws-cn
+
+custom:
+  chrome:
+    flags:
+      - --window-size=1280,1696 # Letter size
+      - --hide-scrollbars
+
+functions:
+  # version-info:
+  #   description: Headless Chrome Serverless-framework version info example
+  #   memorySize: 1024
+  #   timeout: 30
+  #   handler: src/handlers/version.default
+  #   events:
+  #     - http:
+  #         path: version-info
+  #         method: get
+  #         authorizer: aws_iam
+
+  # request-logger:
+  #   description: Headless Chrome Serverless-framework request logging example
+  #   memorySize: 1024
+  #   timeout: 30
+  #   handler: src/handlers/requestLogger.default
+  #   events:
+  #     - http:
+  #         path: request-logger
+  #         method: get
+  #         authorizer: aws_iam
+
+  # screenshot:
+  #   description: Headless Chrome Serverless-framework screenshot example
+  #   memorySize: 1536
+  #   timeout: 30
+  #   handler: src/handlers/screenshot.default
+  #   events:
+  #     - http:
+  #         path: screenshot
+  #         method: get
+  #         authorizer: aws_iam
+
+  pdf:
+    description: Headless Chrome Serverless-framework PDF example
+    memorySize: 1536
+    timeout: 30
+    handler: src/handlers/pdf.default
+    events:
+      - http:
+          path: pdf
+          method: get
+          authorizer: aws_iam
+
+  html2pdf:
+    description: html string to pdf 
+    memorySize: 1536
+    timeout: 30
+    handler: src/handlers/html2pdf.default
+    events:
+      - http:
+          path: html2pdf
+          method: post
+          authorizer: aws_iam
+
+# Work around aws cn bug of APIGateway
+# https://github.com/serverless/serverless/pull/4665#issuecomment-365843810
+resources:
+  Resources:
+    ApiGatewayRestApi:
+      Properties:
+        BinaryMediaTypes:
+          - "*/*"
+
+    # Enable X-Ray tracing on Lambda functions
+    # ScreenshotLambdaFunction:
+    #   Properties:
+    #     TracingConfig:
+    #       Mode: Active
+    # PdfLambdaFunction:
+    #   Properties:
+    #     TracingConfig:
+    #       Mode: Active
