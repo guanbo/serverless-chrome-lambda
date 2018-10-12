@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/adieuadieu/serverless-chrome.git"
+    "url": "git+https://github.com/guanbo/serverless-chrome-lambda.git"
   },
   "keywords": [
     "serverless",
@@ -37,12 +37,12 @@
     "screen capture",
     "pdf"
   ],
-  "author": "Marco Lüthy",
+  "author": "guanbo",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/adieuadieu/serverless-chrome/issues"
+    "url": "https://github.com/guanbo/serverless-chrome-lambda/issues"
   },
-  "homepage": "https://github.com/adieuadieu/serverless-chrome/tree/master/examples/serverless-framework/aws",
+  "homepage": "https://github.com/guanbo/serverless-chrome-lambda",
   "dependencies": {
     "@serverless-chrome/lambda": "^1.0.0-55",
     "chrome-remote-interface": "^0.26.1"
