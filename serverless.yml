@@ -6,6 +6,11 @@ provider:
   stage: dev
   region: cn-northwest-1
   endpointType: REGIONAL
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "arn:aws-cn:s3:::${self:custom.bucket}/*"
   # aws-cn not support enviroment
   # environment:
   #   DEBUG: "*"
@@ -22,6 +27,7 @@ custom:
     flags:
       - --window-size=1280,1696 # Letter size
       - --hide-scrollbars
+  bucket: stage-temp
 
 functions:
   # version-info:
@@ -57,16 +63,16 @@ functions:
   #         method: get
   #         authorizer: aws_iam
 
-  pdf:
-    description: Headless Chrome Serverless-framework PDF example
-    memorySize: 1536
-    timeout: 30
-    handler: src/handlers/pdf.default
-    events:
-      - http:
-          path: pdf
-          method: get
-          authorizer: aws_iam
+  # pdf:
+  #   description: Headless Chrome Serverless-framework PDF example
+  #   memorySize: 1536
+  #   timeout: 30
+  #   handler: src/handlers/pdf.default
+  #   events:
+  #     - http:
+  #         path: pdf
+  #         method: get
+  #         authorizer: aws_iam
 
   html2pdf:
     description: html string to pdf 

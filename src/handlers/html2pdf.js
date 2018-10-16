@@ -1,14 +1,23 @@
 import log from '../utils/log'
 import { makePrintOptions, renderFromHtml } from '../chrome/pdf'
+import AWS from 'aws-sdk'
+
+const S3 = new AWS.S3()
+const BUCKET = process.env.BUCKET||'stage-temp'
+const ONE_WEEK = 7*24*60*60
+const ONE_WEEK_MS = ONE_WEEK*1000
+const MAX_BODY_LIMIT = 10*1024*1024
 
 process.env.LOGGING=true
+// process.env.DEBUG=true
 
 export default async function html2pdf(event, context, callback) {
   const queryStringParameters = event.queryStringParameters || {}
   const {
-    url = 'https://github.com/guanbo',
+    key = '我是测试文件test.pdf',
     ...printParameters
   } = queryStringParameters
+  const acceptType = event.headers&&event.headers['Accept'] || 'text/plain';
   let html = event.body || 'no content'
   const printOptions = makePrintOptions(printParameters)
   let data
@@ -26,14 +35,47 @@ export default async function html2pdf(event, context, callback) {
 
   log(`Chromium took ${Date.now() - startTime}ms to load HTML and render PDF.`)
 
-  // TODO: handle cases where the response is > 10MB
-  // with saving to S3 or something since API Gateway has a body limit of 10MB
-  return {
+  await S3.putObject({
+    Body: Buffer.from(data, 'base64'),
+    Bucket: BUCKET,
+    ContentType: 'application/pdf',
+    Key: key,
+    ContentDisposition: `attachment; ${encodeURIComponent(key)}`,
+    Expires: new Date(Date.now() + ONE_WEEK_MS) 
+  }).promise()
+
+  let signedUrl = await S3.getSignedUrl('getObject', {
+    Bucket: BUCKET,
+    Key: key,
+    Expires: ONE_WEEK
+  })
+
+  let result = {
     statusCode: 200,
-    body: data,
-    isBase64Encoded: true,
+    body: signedUrl,
     headers: {
-      'Content-Type': 'application/pdf',
+      'Content-Type': 'text/plain; charset=utf-8',
     },
   }
+
+  if (/application\/pdf/.test(acceptType)) {
+    if (data.length > MAX_BODY_LIMIT) {
+      result = {
+        statusCode: 301,
+        headers: {'location': signedUrl},
+        body: '',
+      }
+    } else {
+      result = {
+        statusCode: 200,
+        body: data,
+        isBase64Encoded: true,
+        headers: {
+          'Content-Type': 'application/pdf',
+        },
+      }
+    }
+  }
+
+  return result
 }

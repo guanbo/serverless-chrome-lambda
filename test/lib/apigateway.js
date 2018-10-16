@@ -33,21 +33,21 @@ class APIGatewayService {
     });
   }
 
-  post(uri, body, cb) {
+  post(options, cb) {
     AWS.config.credentials.get(err=>{
       if (err) throw err;
 
-      const _url = url.parse(uri)
-      const req = new AWS.HttpRequest(uri, this.region);
+      const _url = url.parse(options.uri)
+      const req = new AWS.HttpRequest(options.uri, this.region);
       req.method = 'POST';
+      req.headers = Object.assign(req.headers, options.headers);
       req.headers.host = _url.hostname;
-      req.body = body;
-      req.headers['Content-Type'] = 'application/html';
-      req.headers['Content-Length'] = body.length;
+      req.body = options.body;
+      req.headers['Content-Length'] = req.body.length;
 
       let v4signer = new AWS.Signers.V4(req, 'execute-api', true);
       v4signer.addAuthorization(AWS.config.credentials, AWS.util.date.getDate());
-      request.post(uri, {headers: req.headers, body: body, encoding: null}, cb);
+      request.post(options.uri, {headers: req.headers, body: req.body, encoding: null}, cb);
     });
   }
 
