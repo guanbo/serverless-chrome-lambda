@@ -8,7 +8,7 @@ const ONE_WEEK = 7*24*60*60
 const ONE_WEEK_MS = ONE_WEEK*1000
 const MAX_BODY_LIMIT = 10*1024*1024
 
-process.env.LOGGING=true
+// process.env.LOGGING=true
 // process.env.DEBUG=true
 
 export default async function html2pdf(event, context, callback) {
@@ -58,22 +58,14 @@ export default async function html2pdf(event, context, callback) {
     },
   }
 
-  if (/application\/pdf/.test(acceptType)) {
-    if (data.length > MAX_BODY_LIMIT) {
-      result = {
-        statusCode: 301,
-        headers: {'location': signedUrl},
-        body: '',
-      }
-    } else {
-      result = {
-        statusCode: 200,
-        body: data,
-        isBase64Encoded: true,
-        headers: {
-          'Content-Type': 'application/pdf',
-        },
-      }
+  if (/application\/pdf/.test(acceptType) && data.length < MAX_BODY_LIMIT) {
+    result = {
+      statusCode: 200,
+      body: data,
+      isBase64Encoded: true,
+      headers: {
+        'Content-Type': 'application/pdf',
+      },
     }
   }
 

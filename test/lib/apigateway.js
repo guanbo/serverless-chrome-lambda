@@ -47,7 +47,8 @@ class APIGatewayService {
 
       let v4signer = new AWS.Signers.V4(req, 'execute-api', true);
       v4signer.addAuthorization(AWS.config.credentials, AWS.util.date.getDate());
-      request.post(options.uri, {headers: req.headers, body: req.body, encoding: null}, cb);
+      let encoding = req.headers['Accept'] === 'application/pdf'?null:'utf8';
+      request.post(options.uri, {headers: req.headers, body: req.body, encoding: encoding}, cb);
     });
   }
 
@@ -62,21 +63,25 @@ class APIGatewayService {
 
       let v4signer = new AWS.Signers.V4(req, 'execute-api', true);
       v4signer.addAuthorization(AWS.config.credentials, AWS.util.date.getDate());
-      let fstream = fs.createWriteStream(filepath);
-      let r = request.get(uri, {headers: req.headers});
-      r.pause();
-      r.on('response', (res)=>{
-        if(res.statusCode === 200) {
-          r.pipe(fstream);
-          r.resume();
-        } else {
-          cb(res.body, res);
-        }
-      });
-      fstream.on('finish', ()=>cb(null, r.response))
-      r.on('error', function (err) {
-        cb(err, r.response);
-      });
+      this.getfile(uri, filepath, {headers: req.headers}, cb);
+    });
+  }
+
+  getfile(uri, filepath, options, cb) {
+    let r = request.get(uri, options);
+    r.pause();
+    r.on('response', (res)=>{
+      if(res.statusCode === 200) {
+        let fstream = fs.createWriteStream(filepath);
+        fstream.on('finish', ()=>cb(null, r.response));
+        r.pipe(fstream);
+        r.resume();
+      } else {
+        cb(res.body, res);
+      }
+    });
+    r.on('error', function (err) {
+      cb(err, r.response);
     });
   }
 }
