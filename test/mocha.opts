@@ -3,5 +3,5 @@
 --ui bdd
 --slow 1500
 --exit
---timeout 35000
+--timeout 5000
 --require babel-register

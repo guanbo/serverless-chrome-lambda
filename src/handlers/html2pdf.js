@@ -58,14 +58,24 @@ export default async function html2pdf(event, context, callback) {
     },
   }
 
-  if (/application\/pdf/.test(acceptType) && data.length < MAX_BODY_LIMIT) {
-    result = {
-      statusCode: 200,
-      body: data,
-      isBase64Encoded: true,
-      headers: {
-        'Content-Type': 'application/pdf',
-      },
+  if (/application\/pdf/.test(acceptType)) {
+    if (data.length < MAX_BODY_LIMIT) {
+      result = {
+        statusCode: 200,
+        body: data,
+        isBase64Encoded: true,
+        headers: {
+          'Content-Type': 'application/pdf',
+        },
+      }
+    } else {
+      result = {
+        statusCode: 301,
+        body: '',
+        headers: {
+          'location': signedUrl,
+        },
+      }
     }
   }
 
