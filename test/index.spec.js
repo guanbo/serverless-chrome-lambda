@@ -1,6 +1,6 @@
 'use strict';
 
-const APIGatewayService = require('./lib/apigateway');
+const APIGatewayService = require('awsapigateway');
 const apigw = new APIGatewayService();
 const fs = require('fs');
 
@@ -44,7 +44,7 @@ describe('API Gateway', () => {
       });
     });
 
-    it.only('should accept application/pdf up to 10M', function(done) {
+    it('should accept application/pdf up to 10M', function(done) {
       this.timeout(300000);
 
       const opts = JSON.parse(JSON.stringify(options));
